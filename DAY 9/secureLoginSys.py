@@ -17,11 +17,7 @@ def SecureloginSys(func):
             print("Authentication Unsuccessful")
             break
     return login_details   
-           
-        
-        
-        
-           
+       
 
 @SecureloginSys
 def info():
