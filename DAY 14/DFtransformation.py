@@ -19,7 +19,6 @@ df["Status"]=df["Marks"].apply(lambda x:"Pass" if x>=50 else "Fail")
 
 print(f"Student Database:\n{df}")
 df_pass=df[df["Status"]=="Pass"]
-
 avg=df_pass["Marks"].mean()
 
 print(f"Passed Students:\n{df_pass}")
