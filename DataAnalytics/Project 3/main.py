@@ -179,14 +179,14 @@ plt.show()
 #6.	Plot a Histogram: distribution of Height.
 #7.	Save graphs: plt.savefig("height_trend.png"), plt.savefig("height_category_stacked.png"), plt.savefig("height_histogram.png")
 #8.	Identify: Which region has the tallest hills, which category is most common, and the distribution pattern of heights.
-condition=[df['Height'] > 999 ,(df['Height'] <= 999) & (df['Height'] >= 800), df['Height'] < 800]#here is the condition that is givenin the task
+condition=[df['Height'] >=1000 ,(df['Height'] <= 999) & (df['Height'] >= 800), df['Height'] < 800]#here is the condition that is givenin the task
 choose=['Very High','High','Moderate']#here are the options that are to be choosed  according to the condition
 df['Height Category']=np.select(condition,choose,default='Unknown')#here using np.select that works as if,elif,else.
 height_array=df['Height'].to_numpy() #converting column to numpy
 height_growth=np.diff(height_array)#here we are checking the difference between the heights of the hills using np.diff()
 #print(height_growth)
 
-#print(df[df['Height Category']=='Unknown'])
+print(df[df['Height Category']=='Unknown'])
 #Line Graph
 plt.plot(df.index, df['Height']) #marker='o')#here we can use df.index or the matplotlib wil automatically take the index 
 plt.tight_layout()
