@@ -149,4 +149,31 @@ y_pred=knn.predict(X_test)
 # To calculate algorithm score
 evaluate("K-Nearest Neighbors Regressor",y_test,y_pred)
  
- 
+ # ============================================================
+#               Bagging Regressor
+# ============================================================
+from sklearn.ensemble import BaggingRegressor
+
+bagging_model=BaggingRegressor()
+print('-'*80)
+print(bagging_model)
+#training the model
+bagging_model.fit(X_train,y_train)
+y_pred=bagging_model.predict(X_test)
+#To calculate algorithm score
+Model_eval(y_test,y_pred,"Bagging Regressor")
+
+# ============================================================
+#               XGBoost Regressor
+# ============================================================
+from xgboost import XGBRegressor
+
+XGB_model=XGBRegressor()
+print('-'*80)
+#print(XGB_model)
+#training the model
+XGB_model.fit(X_train,y_train)
+y_pred=XGB_model.predict(X_test)
+#To evaluate model 
+Model_eval(y_test,y_pred,"XGBoost Regressor")
+
