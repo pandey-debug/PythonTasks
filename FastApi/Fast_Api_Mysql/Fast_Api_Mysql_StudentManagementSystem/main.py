@@ -1,28 +1,27 @@
 from fastapi import FastAPI,HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy import create_engine,Column,Integer,String,Boolean,Float
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 app=FastAPI()
 # ------------------------------------------------------------
 # 🗄️ Database Configuration# ------------------------------------------------------------
-DATABASE_URL = "mysql+pymysql://root:root@localhost:3306/Stu_Db"
+DATABASE_URL = "mysql+pymysql://root:root@localhost:3306/stud_db"
 
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 # DataBaseModel(Table)
 class stdDb(Base):
     __tablename__="StudentManagementSystem"
     id=Column(Integer,primary_key=True,index=True)
-    name= Column(String(255), nullable=False)
-    age=Column(Integer)
-    Course= Column(String(255), nullable=False)
+    name= Column(String(100))
+    age=Column (Integer)
+    Course= Column(String(100))
     marks=Column(Float)
-    completed = Column(Boolean, default=False)
+    completed = Column(Boolean, default=False) 
 #Creating Table
 Base.metadata.create_all(bind=engine)
 # ------------------------------------------------------------
