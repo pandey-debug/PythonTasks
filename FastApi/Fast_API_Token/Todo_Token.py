@@ -34,7 +34,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from typing import List
+from typing import Optional
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 app = FastAPI()
@@ -43,7 +43,7 @@ app = FastAPI()
 # ============================================================
 SECRET_KEY="TeRrIiV14"
 ALGORITHM="HS256"
-ACCESS_TOKEN_EXPIRE_HOURS=1
+ACCESS_TOKEN_EXPIRE_MINUTES=10
 # 
 # 
 # 
@@ -66,7 +66,7 @@ Base = declarative_base()
 class TodoDB(Base):
     __tablename__ = "todos"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True,autoincrement=False)
     title = Column(String(255), nullable=False)
     completed = Column(Boolean, default=False)
 
@@ -76,7 +76,7 @@ Base.metadata.create_all(bind=engine)
 # 🧾 Pydantic Schema
 # ------------------------------------------------------------
 class Todo(BaseModel):
-    id: int
+    id: Optional[int]
     title: str
     completed: bool = False
 
@@ -99,7 +99,7 @@ def get_db():
 #Create JWT Token 
 def create_access_token(data: dict):
     to_encode=data.copy()
-    expire=datetime.utcnow()+timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    expire=datetime.utcnow()+timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp":expire})   
 
     encoded_jwt=jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM)        
@@ -147,7 +147,7 @@ def login(user: Login):
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "expires_in": "1 Hour"
+        "expires_in": "10 MINUTES"
     }
 
 # ------------------------------------------------------------
