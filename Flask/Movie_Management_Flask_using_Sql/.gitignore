@@ -1,0 +1,5 @@
+VENNV/
+__pycache__/
+movie_booking.db/
+instance/
+*.pyc

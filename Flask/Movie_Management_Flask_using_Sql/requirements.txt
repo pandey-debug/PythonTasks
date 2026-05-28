@@ -1,0 +1,17 @@
+flask
+fastapi
+uvicorn
+sqlalchemy
+requests
+pydantic
+pymysql
+cryptography
+python-jose
+passlib.bcrypt
+python-dotenv   
+pytest
+pytest-cov
+pytest-asyncio
+httpx
+alembic
+pytest-mock

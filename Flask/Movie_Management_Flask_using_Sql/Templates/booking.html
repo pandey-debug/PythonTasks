@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}CineBook - Booking Recliners for {{ movie.title }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ url_for('movie_detail', movie_id=movie.id) }}" class="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-semibold">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>Back to Movie Details</span>
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Seat Map Panel -->
+    <div class="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8">
+        <div class="text-center mb-10">
+            <h1 class="font-display text-2xl font-bold text-white tracking-tight">Reserve Your Luxury Recliners</h1>
+            <p class="text-zinc-400 text-xs mt-1">Select seat count. Seats are grouped together sequentially by default.</p>
+        </div>
+
+        <!-- Cinema Screen visual decoration -->
+        <div class="w-full relative py-2 mb-12">
+            <div class="w-10/12 h-2.5 bg-red-650 opacity-70 mx-auto rounded-full blur-[1px] shadow-[0_0_20px_rgba(239,68,68,0.7)]"></div>
+            <p class="text-[10px] text-zinc-500 uppercase tracking-widest text-center mt-3 font-semibold">STAGE SCREEN THIS WAY</p>
+        </div>
+
+        <!-- Simulated Grid of Seats -->
+        <div class="max-w-md mx-auto space-y-3 p-4 bg-zinc-950/30 border border-zinc-850/60 rounded-2xl mb-8">
+            <!-- Row labels and chairs -->
+            {% for row in ['A', 'B', 'C', 'D', 'E'] %}
+                <div class="flex items-center justify-between gap-3 text-xs font-semibold text-zinc-500">
+                    <span class="w-4">{{ row }}</span>
+                    <div class="flex-grow flex gap-1.5 justify-center">
+                        {% for seat_num in range(1, 9) %}
+                            <!-- Randomly mark some as reserved, some occupied for visual realism -->
+                            {% set is_taken = (row == 'C' and seat_num in [3, 4]) or (row == 'A' and seat_num in [1, 2, 8]) or (row == 'D' and seat_num in [5, 6]) %}
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center border transition-all duration-150 text-[10px] sm:text-xs
+                                {% if is_taken %}
+                                    bg-zinc-800 text-zinc-600 border-zinc-800 cursor-not-allowed
+                                {% else %}
+                                    bg-zinc-900/40 text-zinc-400 border-zinc-800 hover:border-red-500 hover:text-white cursor-pointer
+                                {% endif %}"
+                                {% if not is_taken %}onclick="onSeatClick(this)"{% endif %}>
+                                {{ seat_num }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <span class="w-4 text-right">{{ row }}</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="flex justify-center gap-6 text-xs text-zinc-400 border-t border-zinc-850 pt-5">
+            <div class="flex items-center gap-2">
+                <div class="w-3.5 h-3.5 rounded bg-zinc-900 border border-zinc-850"></div>
+                <span>Available</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3.5 h-3.5 rounded bg-red-600 border border-red-650"></div>
+                <span>Selected</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3.5 h-3.5 rounded bg-zinc-800 border border-zinc-900"></div>
+                <span>Occupied</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Ledger & Calculations -->
+    <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
+        <div class="space-y-6">
+            <div class="border-b border-zinc-850 pb-4">
+                <span class="text-xs font-semibold text-zinc-500 uppercase tracking-widest block mb-1">Checking Out</span>
+                <h2 class="text-xl font-bold text-white font-display line-clamp-1 mb-1">{{ movie.title }}</h2>
+                <span class="text-xs text-red-400 font-medium">Standard luxury recliner section</span>
+            </div>
+
+            <!-- Total calculator selector form field -->
+            <div class="space-y-2">
+                <label for="seat-count" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Number of Tickets</label>
+                <div class="relative">
+                    <select id="seat-count" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-red-500 appearance-none cursor-pointer">
+                        {% for count in range(1, 11) %}
+                            {% if count <= movie.available_seats %}
+                                <option value="{{ count }}">{{ count }} Seat{{ 's' if count > 1 else '' }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <div class="absolute inset-y-0 right-3.5 flex items-center pointer-events-none text-zinc-400">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p class="text-[11px] text-zinc-500">Max 10 per transaction. {{ movie.available_seats }} available seats remaining.</p>
+            </div>
+
+            <!-- Ledger Breakdown -->
+            <div class="bg-zinc-900/40 border border-zinc-850 rounded-2xl p-4 text-xs font-medium space-y-3.5">
+                <div class="flex justify-between items-center text-zinc-400">
+                    <span>Base Ticket Rate</span>
+                    <span>${{ "%.2f"|format(movie.price) }}</span>
+                </div>
+                <div class="flex justify-between items-center text-zinc-400">
+                    <span>Subtotal</span>
+                    <span id="subtotal-display">$0.00</span>
+                </div>
+                <div class="flex justify-between items-center text-zinc-400">
+                    <span>Booking Handling Fee (6%)</span>
+                    <span id="handling-display">$0.00</span>
+                </div>
+                <div class="border-t border-zinc-850/80 pt-3.5 flex justify-between items-center text-white">
+                    <span class="text-sm font-bold">Total Price (USD)</span>
+                    <span id="total-display" class="text-base font-extrabold text-red-400 font-display">$0.00</span>
+                </div>
+            </div>
+
+            <div id="alert-box" class="hidden p-4 rounded-xl text-xs font-semibold border"></div>
+        </div>
+
+        <div class="mt-8 pt-4">
+            <button id="book-btn" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 active:scale-[0.98] text-white font-bold text-sm py-4 rounded-xl transition-all shadow-lg hover:shadow-red-650/20">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                <span>Confirm Reservation Ticket</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SINGLE_PRICE = parseFloat("{{ movie.price }}");
+    const seatSelect = document.getElementById('seat-count');
+    const subtotalDisp = document.getElementById('subtotal-display');
+    const handlingDisp = document.getElementById('handling-display');
+    const totalDisp = document.getElementById('total-display');
+    const bookBtn = document.getElementById('book-btn');
+    const alertBox = document.getElementById('alert-box');
+
+    // Simple reactive layout updater
+    function updateLedger() {
+        const count = parseInt(seatSelect.value) || 1;
+        const subtotal = SINGLE_PRICE * count;
+        const handling = subtotal * 0.06;
+        const total = subtotal + handling;
+
+        subtotalDisp.innerText = `$${subtotal.toFixed(2)}`;
+        handlingDisp.innerText = `$${handling.toFixed(2)}`;
+        totalDisp.innerText = `$${total.toFixed(2)}`;
+    }
+
+    // Interactive chair selector mock click behavior
+    function onSeatClick(element) {
+        if (element.classList.contains('bg-red-600')) {
+            element.classList.remove('bg-red-600', 'text-white', 'border-red-650');
+            element.classList.add('bg-zinc-900/40', 'text-zinc-400', 'border-zinc-800');
+        } else {
+            element.classList.remove('bg-zinc-900/40', 'text-zinc-400', 'border-zinc-800');
+            element.classList.add('bg-red-600', 'text-white', 'border-red-650');
+        }
+    }
+
+    // Initialize calculations on load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateLedger();
+        
+        // Listeners
+        seatSelect.addEventListener('change', updateLedger);
+
+        bookBtn.addEventListener('click', async () => {
+            alertBox.className = 'hidden';
+            bookBtn.disabled = true;
+            bookBtn.innerText = 'Processing Reservation...';
+
+            const tickets = parseInt(seatSelect.value);
+
+            try {
+                const response = await fetch('/booking/{{ movie.id }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seats: tickets })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alertBox.className = 'p-4 rounded-xl text-xs font-semibold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                    alertBox.innerText = 'Reservation verified! Forwarding to ticket stub...';
+                    alertBox.classList.remove('hidden');
+
+                    setTimeout(() => {
+                        window.location.href = `/confirmation/${result.booking_reference}`;
+                    }, 1200);
+
+                } else {
+                    bookBtn.disabled = false;
+                    bookBtn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Confirm Reservation Ticket</span>`;
+                    lucide.createIcons();
+
+                    alertBox.className = 'p-4 rounded-xl text-xs font-semibold border bg-red-500/10 text-red-400 border-red-500/20';
+                    alertBox.innerText = result.message || 'Seat capacity reservation rejected. Try a smaller counts.';
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                bookBtn.disabled = false;
+                bookBtn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Confirm Reservation Ticket</span>`;
+                lucide.createIcons();
+
+                alertBox.className = 'p-4 rounded-xl text-xs font-semibold border bg-red-500/10 text-red-400 border-red-500/20';
+                alertBox.innerText = 'Failed communication with the reservation backend server. Try again.';
+                alertBox.classList.remove('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}
