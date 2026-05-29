@@ -16,8 +16,8 @@ app = FastAPI()
 # ------------------------------------------------------------
 # 🌐 MongoDB Atlas Connection
 # ------------------------------------------------------------
-username = quote_plus("Pandey_debug")
-password = quote_plus("qu7h7YRHY1bHApkF")
+username = quote_plus("")
+password = quote_plus("")
 MONGO_URL = f"mongodb+srv://{username}:{password}@mongodb.bpnhjid.mongodb.net/todo_db?retryWrites=true&w=majority"
 '''
 mongodb+srv://username:password@clustername.xxxxx.mongodb.net/todo_db?retryWrites=true&w=majority

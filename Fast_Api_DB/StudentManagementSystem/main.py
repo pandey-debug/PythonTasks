@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 app=FastAPI()
 # ------------------------------------------------------------
 # 🗄️ Database Configuration# ------------------------------------------------------------
-DATABASE_URL = "mysql+pymysql://root:root@localhost:3306/Stu_Db"
+DATABASE_URL = "mysql+pymysql://XXXXX@localhost:3306/Stu_Db"
 
 
 engine = create_engine(DATABASE_URL)

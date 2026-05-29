@@ -9,7 +9,7 @@ from datetime import datetime
 
 app = FastAPI()
 
-DATABASE_URL = "mysql+pymysql://root:root@localhost:3306/MovieTkt_db"
+DATABASE_URL = "mysql+pymysql://@localhost:3306/MovieTkt_db"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

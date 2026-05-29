@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0d0d0d; color: #e3e3e3; }
+        .gemini-gradient { background: linear-gradient(70deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .chat-bubble-ai { background: #1e1e1e; border: 1px solid #333; }
+        .chat-bubble-user { background: #2b2b2b; }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="p-6 text-center">
+        <h1 class="text-3xl font-bold gemini-gradient">Gemini</h1>
+    </header>
+
+    <!-- Chat Area -->
+    <main id="chat-container" class="flex-1 overflow-y-auto px-4 md:px-20 py-4 space-y-6">
+        <!-- Messages will appear here -->
+        <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center space-y-4">
+            <h2 class="text-4xl font-medium text-gray-500">How can I help you today?</h2>
+        </div>
+    </main>
+
+    <!-- Input Area -->
+    <div class="p-4 md:px-20 pb-8">
+        <div class="relative max-w-4xl mx-auto">
+            <textarea id="question" rows="1" 
+                class="w-full bg-[#1e1e1e] text-white border border-[#444] rounded-2xl py-4 pl-6 pr-16 focus:outline-none focus:border-blue-500 resize-none overflow-hidden"
+                placeholder="Enter a prompt here..."
+                oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+            
+            <button onclick="askGemini()" class="absolute right-3 bottom-3 p-2 bg-blue-600 hover:bg-blue-700 rounded-xl transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function askGemini() {
+            const input = document.getElementById("question");
+            const container = document.getElementById("chat-container");
+            const welcome = document.getElementById("welcome-screen");
+            const question = input.value.trim();
+            if (!question) return;
+
+            if (welcome) welcome.remove();
+
+            // 1. Add User Bubble
+            const userDiv = document.createElement("div");
+            userDiv.className = "flex justify-end";
+            userDiv.innerHTML = `<div class="chat-bubble-user max-w-[80%] rounded-2xl px-5 py-3 shadow-sm">${question}</div>`;
+            container.appendChild(userDiv);
+
+            // 2. Add AI Bubble (Container)
+            const aiDiv = document.createElement("div");
+            aiDiv.className = "flex justify-start";
+            aiDiv.innerHTML = `<div class="chat-bubble-ai max-w-[80%] rounded-2xl px-5 py-3 shadow-sm leading-relaxed"><div id="current-response">...</div></div>`;
+            container.appendChild(aiDiv);
+            
+            const output = aiDiv.querySelector("#current-response");
+            input.value = "";
+            input.style.height = "auto";
+            container.scrollTo(0, container.scrollHeight);
+
+            // 3. Fetch Data
+            const response = await fetch("/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: question })
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            output.innerHTML = ""; // Clear the loading dots
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                output.innerHTML += decoder.decode(value);
+                container.scrollTo(0, container.scrollHeight);
+            }
+            output.id = ""; // Unset ID for next message
+        }
+    </script>
+</body>
+</html>

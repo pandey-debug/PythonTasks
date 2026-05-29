@@ -6,8 +6,8 @@ from mongoengine import connect, Document, IntField, StringField, BooleanField,F
 app=FastAPI()
 # ------------------------------------------------------------
 # 🗄️ Database Configuration# ------------------------------------------------------------
-username = quote_plus("Pandey_debug")
-password = quote_plus("qu7h7YRHY1bHApkF")
+username = quote_plus("")
+password = quote_plus("")
 MONGO_URL = f"mongodb+srv://{username}:{password}@mongodb.bpnhjid.mongodb.net/Student_db?retryWrites=true&w=majority"
 
 connect(db="Student_db", host=MONGO_URL)

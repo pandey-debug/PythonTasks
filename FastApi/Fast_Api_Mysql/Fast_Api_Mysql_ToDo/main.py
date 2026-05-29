@@ -9,7 +9,7 @@ app = FastAPI()
 # 🗄️ Database Configuration
 # ------------------------------------------------------------
 # Replace with your actual connection details if needed.
-DATABASE_URL = "mysql+pymysql://root:root@localhost:3306/todo_db"
+DATABASE_URL = "mysql+pymysql://@localhost:3306/todo_db"
 
 engine = create_engine(DATABASE_URL)
 
